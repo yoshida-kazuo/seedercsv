@@ -1,0 +1,33 @@
+{
+    "name": "cerotechsys/migrate",
+    "type": "library",
+    "description": "sharing library",
+    "keywords": ["migrate", "seeding"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kazuo Yoshida",
+            "email": "yoshida@cero.tech",
+            "homepage": "https://cero.tech"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0|^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cerotechsys\\Migrate": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cerotechsys\\Mirgrate\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
