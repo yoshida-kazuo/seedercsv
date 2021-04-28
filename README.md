@@ -1,2 +1,2 @@
-# migrate
-Migration tool for Laravel
+# seedercsv
+Seeding tool for Laravel
