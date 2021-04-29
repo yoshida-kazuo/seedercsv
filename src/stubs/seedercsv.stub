@@ -1,0 +1,94 @@
+<?php
+/**
+ * Seeder class
+ *
+ * File name (eg : 2021_04_01_000001_users_table.csv
+ * Csv file path : DummyCsvPath
+ * Execution command : php artisan db:seed --class=\DummyNamespace\DummyClass --database=DummyConnection
+ */
+namespace DummyNamespace;
+
+use Cerotechsys\Seedercsv\Services\Csv\ParseService;
+use Illuminate\Database\Seeder as BaseSeeder;
+use Illuminate\Support\Facades\DB;
+use Exception;
+
+class DummyClass extends BaseSeeder
+{
+
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $dir = database_path('DummyCsvPath');
+        $files = glob("{$dir}/*.*");
+        $tblSeed = 'seeds';
+
+        $db = DB::connection('DummyConnection');
+        $db->beginTransaction();
+
+        try {
+            $batchNumber = ($db->table($tblSeed)
+                ->max('batch') ?? 0) + 1;
+
+            foreach ($files as $file) {
+                $table = preg_replace(
+                    '/(^\d{4}_\d{2}_\d{2}_\d{6}_|_table\.csv$)/i',
+                    '',
+                    basename($file)
+                );
+                $data = (new ParseService($file))
+                    ->create();
+
+                foreach ($data['data'] as $key => $value) {
+
+                    foreach ($value as &$v) {
+                        preg_match('/{`php:([^`]+)`}/i', $v, $matches);
+
+                        if (isset($matches[1]) === true) {
+
+                            if (str_ends_with($matches[1], ';') === false) {
+                                $matches[1] .= ';';
+                            }
+
+                            eval("\$v = {$matches[1]}");
+                        }
+
+                    }
+
+                    $db->table($table)
+                        ->updateOrInsert(
+                            $data['cond'][$key],
+                            $value
+                        );
+
+                }
+
+                $dataSeed = collect([
+                    'class'     => '\\'.__CLASS__,
+                    'file'      => str_replace(storage_path('app'), '', $file),
+                    'batch'     => $batchNumber,
+                ]);
+
+                if (! $db->table($tblSeed)
+                    ->insert($dataSeed->toArray())
+                ) {
+                    throw new Exception("File {$tblSeed} : {$dataSeed->toJson()}");
+                }
+            }
+
+            $db->commit();
+
+        } catch(Exception $e) {
+            $db->rollback();
+
+            $this->command->error(
+                $e->getMessage()
+            );
+        }
+    }
+
+}

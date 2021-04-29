@@ -1,33 +1,33 @@
 {
-    "name": "cerotechsys/migrate",
+    "name": "cerotechsys/seedercsv",
+    "description": "Seeding",
+    "keywords": [
+        "laravel",
+        "migrate",
+        "seeder"
+    ],
     "type": "library",
-    "description": "sharing library",
-    "keywords": ["migrate", "seeding"],
     "license": "MIT",
     "authors": [
         {
             "name": "Kazuo Yoshida",
-            "email": "yoshida@cero.tech",
-            "homepage": "https://cero.tech"
+            "email": "yoshida@cero.tech"
         }
     ],
     "require": {
-        "php": "^7.3|^8.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^7.0|^8.0|^9.0"
+        "php": ">=7.3",
+        "laravel/framework": "^8"
     },
     "autoload": {
         "psr-4": {
-            "Cerotechsys\\Migrate": "src"
+            "Cerotechsys\\Seedercsv\\": "src"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Cerotechsys\\Mirgrate\\": "tests/"
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cerotechsys\\Seedercsv\\Providers\\ServiceProvider"
+            ]
         }
-    },
-    "scripts": {
-        "test": "phpunit"
     }
 }
