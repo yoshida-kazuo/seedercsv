@@ -4,7 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/cerotechsys/seedercsv/d/total.png)](https://packagist.org/packages/cerotechsys/seedercsv)
 
 ## Server Requirements
-* PHP >= 7.3, Laravel 8
+* PHP >= 7.3, Laravel ^8.40
 
 ## Installation
 
@@ -60,12 +60,18 @@ Below is a csv data sample.
 col1,col2,col3,created_at,updated_at
 col1,,,,
 1,test01,{`php:bcrypt('test1')`},{`php:DB::raw('now()')`},{`php:DB::raw('now()')`}
-2,test02,test02@example.jp,{`php:bcrypt('test2')`},{`php:now()`},{`php:now()`}
+2,test02,{`php:bcrypt('test2')`},{`php:now()`},{`php:now()`}
 ```
 
 * Line 1: First name Defines the field name.
 * Second line: Defines the field name used in the condition.
 * 3rd line: When embedding PHP code, please define it referring to the right. : ```{`php: <php code>`}```
+
+Change the connection destination.
+```shell
+$ php artisan make:seedercsv Master/Dir/ExampleSeeder --table=user --conection=write_db
+```
+The default setting is `mysql`.
 
 ## Example
 

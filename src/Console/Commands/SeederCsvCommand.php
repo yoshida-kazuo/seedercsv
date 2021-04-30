@@ -134,7 +134,7 @@ class SeederCsvCommand extends GeneratorCommand
                             $table
                         )
                     ),
-                    "col1,col2,col3,created_at,updated_at\r\ncol1,,,,\r\n1,test01,{`php:bcrypt('test1')`},{`php:DB::raw('now()')`},{`php:DB::raw('now()')`}\r\n2,test02,test02@example.jp,{`php:bcrypt('test2')`},{`php:now()`},{`php:now()`}"
+                    "col1,col2,col3,created_at,updated_at\r\ncol1,,,,\r\n1,test01,{`php:bcrypt('test1')`},{`php:DB::raw('now()')`},{`php:DB::raw('now()')`}\r\n2,test02,{`php:bcrypt('test2')`},{`php:now()`},{`php:now()`}"
                 );
             }
 
