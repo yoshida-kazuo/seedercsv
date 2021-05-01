@@ -4,7 +4,9 @@
     "keywords": [
         "laravel",
         "migrate",
-        "seeder"
+        "seeder",
+        "seeds",
+        "csv"
     ],
     "type": "library",
     "license": "MIT",
@@ -16,11 +18,13 @@
     ],
     "require": {
         "php": ">=7.3",
-        "laravel/framework": "^8.40"
+        "laravel/framework": "^8.40|^6.20"
     },
     "autoload": {
         "psr-4": {
-            "Cerotechsys\\Seedercsv\\": "src"
+            "Cerotechsys\\Seedercsv\\": "src",
+            "Cerotechsys\\Seedercsv\\Seeders\\": "database/seeders/",
+            "Cerotechsys\\Seedercsv\\Seeds\\": "database/seeds/"
         }
     },
     "extra": {

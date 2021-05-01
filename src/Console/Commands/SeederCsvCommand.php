@@ -103,8 +103,30 @@ class SeederCsvCommand extends GeneratorCommand
         // stub files so that it gets the correctly formatted namespace and class name.
         $this->makeDirectory($path);
 
-        // csv directory
+        // Generate class and csv files.
         $this->csvPath = "seeders/Csv/{$this->argument('name')}/empty";
+        $this->generate(
+            $name,
+            $path
+        );
+
+        $this->info($this->type.' created successfully.');
+    }
+
+    /**
+     * generate function
+     *
+     * @param string $name
+     * @param string $path
+     *
+     * @return void
+     */
+    protected function generate(
+        string $name,
+        string $path
+    ) {
+
+        // csv directory
         $this->makeDirectory(
             $this->laravel->databasePath(
                 $this->csvPath
@@ -140,7 +162,6 @@ class SeederCsvCommand extends GeneratorCommand
 
         }
 
-        $this->info($this->type.' created successfully.');
     }
 
     /**
@@ -175,13 +196,8 @@ class SeederCsvCommand extends GeneratorCommand
     protected function getPath($name)
     {
         $name = $this->argument('name');
-        $filepath = $this->laravel->databasePath().'/seeders/'.$name.'.php';
 
-        if (is_dir($this->laravel->databasePath().'/seeds')) {
-            $filepath = $this->laravel->databasePath().'/seeds/'.$name.'.php';
-        }
-
-        return $filepath;
+        return $this->laravel->databasePath().'/seeders/'.$name.'.php';
     }
 
     /**

@@ -4,7 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/cerotechsys/seedercsv/d/total.png)](https://packagist.org/packages/cerotechsys/seedercsv)
 
 ## Server Requirements
-* PHP >= 7.3, Laravel ^8.40
+* PHP `>=7.3`, Laravel `^6.20`|`^8.40`
 
 ## Installation
 
@@ -53,7 +53,7 @@ If you need to specify multiple tables, define them separated by commas.
 $ php artisan make:seedercsv Master/Dir/ExampleSeeder --table=users,blogs,...
 ```
 
-Define the CSV file name. `yy_mm_dd_<6 digits of microseconds>_<table name>_table.csv`
+Define the CSV file name. `yyyy_mm_dd_<6 digits of microseconds>_<table name>_table.csv`
 
 Below is a csv data sample.
 ```
