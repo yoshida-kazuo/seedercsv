@@ -5,6 +5,7 @@ namespace Cerotechsys\Seedercsv\Providers;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Cerotechsys\Seedercsv\Console\Commands\SeederCsvCommand;
 use Cerotechsys\Seedercsv\Console\Commands\LegacySeederCsvCommand;
+use Cerotechsys\Seedercsv\Console\Commands\SeederCsvStatusCommand;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -35,12 +36,16 @@ class ServiceProvider extends BaseServiceProvider
             /** Attach command */
             $commands = [
                 SeederCsvCommand::class,
+                SeederCsvStatusCommand::class,
             ];
+
             if (stripos($this->app->version(), '6') === 0) {
                 $commands = [
                     LegacySeederCsvCommand::class,
+                    SeederCsvStatusCommand::class,
                 ];
             }
+
             $this->commands($commands);
 
         }

@@ -14,7 +14,7 @@ class SeederCsvCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:seedercsv {--connection=?} {--table=?}';
+    protected $name = 'make:seedercsv';
 
     /**
      * The console command description.
@@ -55,13 +55,13 @@ class SeederCsvCommand extends GeneratorCommand
         parent::__construct($files);
 
         $this->addOption('--connection',
-                null,
+                '-c',
                 InputOption::VALUE_OPTIONAL,
                 'Set the connection name defined in the database configuration file.',
                 config('database.default')
             )
             ->addOption('--table',
-                null,
+                '-t',
                 InputOption::VALUE_OPTIONAL,
                 'If you select more than one, you need to separate them with commas.'
             );
@@ -108,6 +108,15 @@ class SeederCsvCommand extends GeneratorCommand
         $this->generate(
             $name,
             $path
+        );
+
+        $this->info(
+            sprintf(
+                'Execution command : php artisan db:seed --class=\%s\%s --database=%s',
+                $this->getNamespace($name),
+                basename(str_replace('\\', '/', $name)),
+                $this->option('connection')
+            )
         );
 
         $this->info($this->type.' created successfully.');

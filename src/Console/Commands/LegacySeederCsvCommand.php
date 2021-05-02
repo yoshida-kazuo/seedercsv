@@ -66,6 +66,15 @@ class LegacySeederCsvCommand extends SeederCsvCommand
             $path
         );
 
+        $this->info(
+            sprintf(
+                'Execution command : php artisan db:seed --class=\%s\%s --database=%s',
+                $this->getNamespace($name),
+                basename(str_replace('\\', '/', $name)),
+                $this->option('connection')
+            )
+        );
+
         $this->info($this->type.' created successfully.');
 
         $this->composer->dumpAutoloads();

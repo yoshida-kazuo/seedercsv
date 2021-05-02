@@ -1,5 +1,6 @@
 {
     "name": "cerotechsys/seedercsv",
+    "homepage": "https://cero.tech",
     "description": "Seeding",
     "keywords": [
         "laravel",

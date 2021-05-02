@@ -184,3 +184,31 @@ class ExampleSeeder extends BaseSeeder
 
 }
 ```
+
+## Check the registered Seeding files.
+
+Execute the following command.
+```shell
+$ php artisan seedercsv:status
+```
+
+### Options
+Connection settings
+```shell
+$ php artisan seedercsv:status --coneection=write_db
+```
+
+Adjust the number of items to be displayed.
+```shell
+$ php artisan seedercsv:status --limit=100
+```
+
+Execution result
+```shell
++----+------------------------------------+----------------------------------------------------------------------------------+-------+
+| id | class                              | file                                                                             | batch |
++----+------------------------------------+----------------------------------------------------------------------------------+-------+
+| 1  | \Database\Seeders\Data\UserSeeder  | /var/www/database/seeders/Csv/Data/UserSeeder/2021_05_02_213232_users_table.csv  | 1     |
+| 2  | \Database\Seeders\Data\User2Seeder | /var/www/database/seeders/Csv/Data/User2Seeder/2021_05_02_687711_users_table.csv | 2     |
++----+------------------------------------+----------------------------------------------------------------------------------+-------+
+```
