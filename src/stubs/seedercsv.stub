@@ -11,6 +11,10 @@ namespace DummyNamespace;
 use Cerotechsys\Seedercsv\Services\Csv\ParseService;
 use Illuminate\Database\Seeder as BaseSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\Grammars\MySqlGrammar;
+use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
+use Illuminate\Database\Query\Grammars\SqlServerGrammar;
 use Exception;
 
 class DummyClass extends BaseSeeder
@@ -23,6 +27,9 @@ class DummyClass extends BaseSeeder
      */
     public function run()
     {
+        $useCommand = 'DummyUseCommand';
+
+        $truncate = 'DummyTruncate';
         $dir = database_path('DummyCsvPath');
         $files = glob("{$dir}/*.*");
         $tblSeed = 'seeds';
@@ -40,8 +47,28 @@ class DummyClass extends BaseSeeder
                     '',
                     basename($file)
                 );
-                $data = (new ParseService($file))
+                $data = (new ParseService($file, $useCommand))
                     ->create();
+
+                if ($truncate === 'on') {
+
+                    $targetTable = $db->table($table);
+
+                    if (is_a($targetTable->getGrammar(), MySqlGrammar::class) === true) {
+                        $targetTable->delete();
+                    }
+
+                    if (is_a($targetTable->getGrammar(), SQLiteGrammar::class) === true) {
+                        $targetTable->delete();
+                    }
+
+                    if (is_a($targetTable->getGrammar(), PostgresGrammar::class) === true
+                        || is_a($targetTable->getGrammar(), SqlServerGrammar::class) === true
+                    ) {
+                        $targetTable->truncate();
+                    }
+
+                }
 
                 foreach ($data['data'] as $key => $value) {
 
@@ -59,11 +86,20 @@ class DummyClass extends BaseSeeder
 
                     }
 
-                    $db->table($table)
-                        ->updateOrInsert(
-                            $data['cond'][$key],
-                            $value
-                        );
+                    $targetTable = $db->table($table);
+
+                    if ($useCommand === 'updateOrInsert') {
+                        $targetTable->$useCommand(
+                                $data['cond'][$key],
+                                $value
+                            );
+                    } elseif ($useCommand === 'insert') {
+                        $targetTable->$useCommand(
+                                $value
+                            );
+                    } else {
+                        throw new Exception('The command is incorrect.');
+                    }
 
                 }
 
@@ -88,6 +124,8 @@ class DummyClass extends BaseSeeder
             $this->command->error(
                 $e->getMessage()
             );
+
+            return false;
         }
     }
 

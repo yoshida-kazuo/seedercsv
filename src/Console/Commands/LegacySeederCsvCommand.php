@@ -2,11 +2,28 @@
 
 namespace Cerotechsys\Seedercsv\Console\Commands;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Composer;
+use Illuminate\Support\Str;
 
 class LegacySeederCsvCommand extends SeederCsvCommand
 {
+    /**
+     * Set the command used for registration.
+     * updateOrInesrt
+     *
+     * @var string
+     */
+    const USE_UPDATEORINSERT = 'update_or_insert';
+
+    /**
+     * Set the command used for registration.
+     * insert
+     *
+     * @var string
+     */
+    const USE_INSERT = 'insert';
 
     /**
      * composer variable
@@ -39,6 +56,28 @@ class LegacySeederCsvCommand extends SeederCsvCommand
      */
     public function handle()
     {
+        // Validation option values
+        $validator = Validator::make(
+            $this->options(), [
+                'use'   => [
+                    'nullable',
+                    'in:' . self::USE_UPDATEORINSERT . ',' . self::USE_INSERT,
+                ],
+            ],
+        );
+
+        if ($validator->fails()) {
+            $this->error(
+                implode("\n", $validator->errors()->all())
+            );
+
+            return false;
+        }
+
+        $this->use = Str::camel(
+            strtolower($this->option('use'))
+        );
+
         $name = $this->qualifyClass($this->getNameInput());
 
         $path = $this->getPath($name);
@@ -46,9 +85,9 @@ class LegacySeederCsvCommand extends SeederCsvCommand
         // Next, We will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
         // code is untouched. Otherwise, we will continue generating this class' files.
-        if ((! $this->hasOption('force') ||
-             ! $this->option('force')) &&
-             $this->alreadyExists($this->getNameInput())) {
+        if (! $this->option('force') &&
+            $this->alreadyExists($this->getNameInput())
+        ) {
             $this->error($this->type.' already exists!');
 
             return false;

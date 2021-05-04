@@ -2,12 +2,30 @@
 
 namespace Cerotechsys\Seedercsv\Console\Commands;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
 class SeederCsvCommand extends GeneratorCommand
 {
+
+    /**
+     * Set the command used for registration.
+     * updateOrInesrt
+     *
+     * @var string
+     */
+    const USE_UPDATEORINSERT = 'update_or_insert';
+
+    /**
+     * Set the command used for registration.
+     * insert
+     *
+     * @var string
+     */
+    const USE_INSERT = 'insert';
 
     /**
      * The console command name.
@@ -45,6 +63,13 @@ class SeederCsvCommand extends GeneratorCommand
     protected $csvPath = null;
 
     /**
+     * use variable
+     *
+     * @var string
+     */
+    protected $use = 'updateOrInsert';
+
+    /**
      * Create a new controller creator command instance.
      *
      * @param  \Illuminate\Filesystem\Filesystem  $files
@@ -64,6 +89,20 @@ class SeederCsvCommand extends GeneratorCommand
                 '-t',
                 InputOption::VALUE_OPTIONAL,
                 'If you select more than one, you need to separate them with commas.'
+            )
+            ->addOption('--use',
+                '-u',
+                InputOption::VALUE_OPTIONAL,
+                'Set the command used for registration. eg) update_or_insert or insert',
+                'update_or_insert'
+            )
+            ->addOption('--truncate',
+                null,
+                InputOption::VALUE_NONE
+            )
+            ->addOption('--force',
+                '-f',
+                InputOption::VALUE_NONE
             );
     }
 
@@ -74,6 +113,28 @@ class SeederCsvCommand extends GeneratorCommand
      */
     public function handle()
     {
+        // Validation option values
+        $validator = Validator::make(
+            $this->options(), [
+                'use'   => [
+                    'nullable',
+                    'in:' . self::USE_UPDATEORINSERT . ',' . self::USE_INSERT,
+                ],
+            ],
+        );
+
+        if ($validator->fails()) {
+            $this->error(
+                implode("\n", $validator->errors()->all())
+            );
+
+            return false;
+        }
+
+        $this->use = Str::of($this->option('use'))
+            ->lower()
+            ->camel();
+
         // First we need to ensure that the given name is not a reserved word within the PHP
         // language and that the class name will actually be valid. If it is not valid we
         // can error now and prevent from polluting the filesystem using invalid files.
@@ -90,9 +151,9 @@ class SeederCsvCommand extends GeneratorCommand
         // Next, We will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
         // code is untouched. Otherwise, we will continue generating this class' files.
-        if ((! $this->hasOption('force') ||
-             ! $this->option('force')) &&
-             $this->alreadyExists($this->getNameInput())) {
+        if (! $this->option('force') &&
+            $this->alreadyExists($this->getNameInput())
+        ) {
             $this->error($this->type.' already exists!');
 
             return false;
@@ -241,6 +302,8 @@ class SeederCsvCommand extends GeneratorCommand
                 'DummyClass',
                 'DummyCsvPath',
                 'DummyConnection',
+                'DummyUseCommand',
+                'DummyTruncate',
             ], [
                 '{{ namespace }}',
                 '{{ rootNamespace }}',
@@ -248,6 +311,8 @@ class SeederCsvCommand extends GeneratorCommand
                 '{{ class }}',
                 '{{ csvPath }}',
                 '{{ connection }}',
+                '{{ useCommand }}',
+                '{{ Truncate }}',
             ], [
                 '{{namespace}}',
                 '{{rootNamespace}}',
@@ -255,6 +320,8 @@ class SeederCsvCommand extends GeneratorCommand
                 '{{class}}',
                 '{{csvPath}}',
                 '{{connection}}',
+                '{{useCommand}}',
+                '{{Truncate}}',
             ],
         ];
 
@@ -267,6 +334,8 @@ class SeederCsvCommand extends GeneratorCommand
                     basename(str_replace('\\', '/', $name)),
                     dirname($this->csvPath),
                     $this->option('connection'),
+                    $this->use,
+                    $this->option('truncate') ? 'on' : 'off',
                 ],
                 $stub
             );

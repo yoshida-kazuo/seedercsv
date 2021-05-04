@@ -2,6 +2,7 @@
 
 namespace Cerotechsys\Seedercsv\Services\Csv;
 
+use Cerotechsys\Seedercsv\Console\Commands\SeederCsvCommand;
 use SplFileObject;
 
 class ParseService
@@ -22,15 +23,25 @@ class ParseService
     protected $charset = 'sjis-win';
 
     /**
+     * useCommand variable
+     *
+     * @var string
+     */
+    protected $useCommand = null;
+
+    /**
      * Constructor
      *
      * @param string $filepath
      *
      * @return void
      */
-    public function __construct(string $filepath)
-    {
+    public function __construct(
+        string $filepath,
+        string $useCommand = 'updateOrInsert'
+    ) {
         $this->Csv = new SplFileObject($filepath);
+        $this->useCommand = $useCommand;
 
         $this->charset = mb_detect_encoding(
             file_get_contents($filepath),
@@ -84,7 +95,10 @@ class ParseService
                     $countCols++;
                 }
 
-            } elseif ($this->Csv->key() === 1) {
+            } elseif (
+                $this->Csv->key() === 1
+                && $this->useCommand === 'updateOrInsert'
+            ) {
 
                 foreach ($buff as $key => $colname) {
                     $cond[$key] = $replace($colname);

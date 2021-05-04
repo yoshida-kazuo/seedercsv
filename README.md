@@ -55,23 +55,55 @@ $ php artisan make:seedercsv Master/Dir/ExampleSeeder --table=users,blogs,...
 
 Define the CSV file name. `yyyy_mm_dd_<6 digits of microseconds>_<table name>_table.csv`
 
-Below is a csv data sample.
-```
+Below is a csv data example.
+```shell
 col1,col2,col3,created_at,updated_at
 col1,,,,
 1,test01,{`php:bcrypt('test1')`},{`php:DB::raw('now()')`},{`php:DB::raw('now()')`}
 2,test02,{`php:bcrypt('test2')`},{`php:now()`},{`php:now()`}
 ```
 
+| columns | col1 | col2 | col3 | created_at | updated_at |
+| --- | --- | --- | --- | --- | --- |
+| condition columns | col1 | - | - | - | - |
+| data | 1 | test01 | {`php:bcrypt('test1')`} | {`php:DB::raw('now()')`} | {`php:DB::raw('now()')`} |
+| data | 2 | test02 | {`php:bcrypt('test1')`} | {`php:now()`} | {`php:now()`} |
+
+
 * Line 1: First name Defines the field name.
 * Second line: Defines the field name used in the condition.
 * 3rd line: When embedding PHP code, please define it referring to the right. : ```{`php: <php code>`}```
+
+
+You can select `insert` or `updateOrInsert`. The default value is `updateOrInsert`.
+```shell
+$ php artisan make:seedercsv Master/Dir/ExampleSeeder --use=insert
+```
+
+The following is a example when `insert` is selected.
+```shell
+col1,col2,col3,created_at,updated_at
+1,test01,{`php:bcrypt('test1')`},{`php:DB::raw('now()')`},{`php:DB::raw('now()')`}
+```
+
+| columns | col1 | col2 | col3 | created_at | updated_at |
+| --- | --- | --- | --- | --- | --- |
+| data | 1 | test01 | {`php:bcrypt('test1')`} | {`php:DB::raw('now()')`} | {`php:DB::raw('now()')`} |
+| data | 2 | test02 | {`php:bcrypt('test1')`} | {`php:now()`} | {`php:now()`} |
+
 
 Change the connection destination.
 ```shell
 $ php artisan make:seedercsv Master/Dir/ExampleSeeder --table=user --conection=write_db
 ```
 The default setting is `mysql`.
+
+Execute after deleted.
+```shell
+$ php artisan make:seedercsv Master/Dir/ExampleSeeder --truncate
+```
+* Below, in the case of DB, `truncate` is not executed. execute the `delete` command.
+  * `MySQL`, `sqlite`
 
 ## Example
 
@@ -88,7 +120,7 @@ Generated file
 ### Let's take a look at the generated ExampleSeeder.php class
 * The command to execute : `php artisan db:seed --class=\Database\Seeders\Master\Dir\ExampleSeeder --database=mysql`
 * Change the class file if necessary.
-```php
+```php ExampleSeeder.php {.line-number}
 <?php
 /**
  * Seeder class
@@ -100,9 +132,13 @@ Generated file
 namespace Database\Seeders\Master\Dir;
 
 use Cerotechsys\Seedercsv\Services\Csv\ParseService;
-use Exception;
 use Illuminate\Database\Seeder as BaseSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\Grammars\MySqlGrammar;
+use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
+use Illuminate\Database\Query\Grammars\SqlServerGrammar;
+use Exception;
 
 class ExampleSeeder extends BaseSeeder
 {
@@ -114,6 +150,9 @@ class ExampleSeeder extends BaseSeeder
      */
     public function run()
     {
+        $useCommand = 'updateOrInsert';
+
+        $truncate = 'off';
         $dir = database_path('seeders/Csv/Master/Dir/ExampleSeeder');
         $files = glob("{$dir}/*.*");
         $tblSeed = 'seeds';
@@ -131,8 +170,28 @@ class ExampleSeeder extends BaseSeeder
                     '',
                     basename($file)
                 );
-                $data = (new ParseService($file))
+                $data = (new ParseService($file, $useCommand))
                     ->create();
+
+                if ($truncate === 'on') {
+
+                    $targetTable = $db->table($table);
+
+                    if (is_a($targetTable->getGrammar(), MySqlGrammar::class) === true) {
+                        $targetTable->delete();
+                    }
+
+                    if (is_a($targetTable->getGrammar(), SQLiteGrammar::class) === true) {
+                        $targetTable->delete();
+                    }
+
+                    if (is_a($targetTable->getGrammar(), PostgresGrammar::class) === true
+                        || is_a($targetTable->getGrammar(), SqlServerGrammar::class) === true
+                    ) {
+                        $targetTable->truncate();
+                    }
+
+                }
 
                 foreach ($data['data'] as $key => $value) {
 
@@ -150,11 +209,20 @@ class ExampleSeeder extends BaseSeeder
 
                     }
 
-                    $db->table($table)
-                        ->updateOrInsert(
-                            $data['cond'][$key],
-                            $value
-                        );
+                    $targetTable = $db->table($table);
+
+                    if ($useCommand === 'updateOrInsert') {
+                        $targetTable->$useCommand(
+                                $data['cond'][$key],
+                                $value
+                            );
+                    } elseif ($useCommand === 'insert') {
+                        $targetTable->$useCommand(
+                                $value
+                            );
+                    } else {
+                        throw new Exception('The command is incorrect.');
+                    }
 
                 }
 
@@ -179,6 +247,8 @@ class ExampleSeeder extends BaseSeeder
             $this->command->error(
                 $e->getMessage()
             );
+
+            return false;
         }
     }
 
