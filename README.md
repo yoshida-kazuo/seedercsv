@@ -10,7 +10,7 @@
 
 Require this package with composer.
 ```shell
-composer require cerotechsys/seedercsv
+composer require --dev cerotechsys/seedercsv
 ```
 
 Executing the migrate to generate a `seeds` table.
