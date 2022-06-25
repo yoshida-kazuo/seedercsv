@@ -1,18 +1,9 @@
 ## Laravel Seedercsv
-[![Packagist License](https://poser.pugx.org/cerotechsys/seedercsv/license.png)](http://choosealicense.com/licenses/mit/)
-[![Latest Stable Version](https://poser.pugx.org/cerotechsys/seedercsv/version.png)](https://packagist.org/packages/cerotechsys/seedercsv)
-[![Total Downloads](https://poser.pugx.org/cerotechsys/seedercsv/d/total.png)](https://packagist.org/packages/cerotechsys/seedercsv)
 
 ## Server Requirements
 * PHP `>=7.3`, Laravel `^6.20`|`^8.40`
 
 ## Installation
-
-Require this package with composer.
-```shell
-composer require --dev cerotechsys/seedercsv
-```
-
 Executing the migrate to generate a `seeds` table.
 ```shell
 php artisan migrate
